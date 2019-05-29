@@ -32,45 +32,14 @@ HTML comments are not preserved.
 
 ### Browser
 
-*Think first: why do you want to use it in the browser?* Remember, *servers must never trust browsers.* You can't sanitize HTML for saving on the server anywhere else but on the server.
+Why would you want a node streams based library to run in the browser?  
 
-But, perhaps you'd like to display sanitized HTML immediately in the browser for preview. Or ask the browser to do the sanitization work on every page load. You can if you want to!
-
-* Clone repository
-* Run npm install and build / minify:
-
-```bash
-npm install
-npm run minify
-```
-
-You'll find the minified and unminified versions of sanitize-html-stream (with all its dependencies included) in the dist/ directory.
-
-Use it in the browser:
-
-```html
-<html>
-    <body>
-        <script type="text/javascript"  src="dist/sanitize-html-stream.js"></script>
-        <script type="text/javascript" src="demo.js"></script>
-    </body>
-</html>
-```
-
-```javascript
-var html = "<strong>hello world</strong>";
-console.log(sanitizeHtml(html));
-console.log(sanitizeHtml("<img src=x onerror=alert('img') />"));
-console.log(sanitizeHtml("console.log('hello world')"));
-console.log(sanitizeHtml("<script>alert('hello world')</script>"));
-```
-
-### Node (Recommended)
+### Node (Required)
 
 Install module from console:
 
 ```bash
-npm install sanitize-html
+npm install sanitize-html-stream
 ```
 
 Use it in your node app:
@@ -275,7 +244,7 @@ To a link with anchor text:
 
 ### Filters
 
-Filters have been removed from the streaming version of this library as I haven't yet figured out a way to implement them.
+Filters have been removed from the streaming version of this library as I haven't yet figured out a way to implement them without defeating the purpose of streaming.  (I haven't tried very hard as I don't need them at this moment.)
 
 ### Allowed CSS Styles
 
@@ -362,8 +331,8 @@ Note that if you use this option you are responsible for stating the entire list
 
 The content still gets escaped properly, with the exception of the `script` and `style` tags. *Allowing either `script` or `style` leaves you open to XSS attacks. Don't do that* unless you have good reason to trust their origin.
 
-## About P'unk Avenue and Apostrophe
+## About sanitize-html-stream, P'unk Avenue and Apostrophe
 
-`sanitize-html-stream` is a streaming fork done in an afternoon of `sanitize-html`, which was created at [P'unk Avenue](http://punkave.com) for use in ApostropheCMS, an open-source content management system built on node.js. If you like `sanitize-html-stream` you should definitely [check out apostrophecms.org](http://apostrophecms.org).  I've posted this to npm and github because it seems there's no other **streaming** html sanitizer available.  
+`sanitize-html-stream` is a streaming fork done in an afternoon of `sanitize-html`, which was created at [P'unk Avenue](http://punkave.com) for use in ApostropheCMS, an open-source content management system built on node.js. If you like `sanitize-html-stream` you should definitely [check out apostrophecms.org](http://apostrophecms.org).  I've posted this to npm and github because it seems there's no other **streaming** html sanitizer available and I should probably give back!  
 
 
