@@ -1,119 +1,120 @@
 var assert = require("assert");
-describe('sanitizeHtml', function() {
+
+describe('sanitizeHtml', async function() {
   var sanitizeHtml;
-  it('should be successfully initialized', function() {
-    sanitizeHtml = require('../dist/index.js');
+  it('should be successfully initialized', async function() {
+    sanitizeHtml = require('../dist/index.js').sanitizeHtml;
   });
-  it('should pass through simple well-formed whitelisted markup', function() {
-    assert.equal(sanitizeHtml('<div><p>Hello <b>there</b></p></div>'), '<div><p>Hello <b>there</b></p></div>');
+  it('should pass through simple well-formed whitelisted markup', async function() {
+    assert.equal(await sanitizeHtml('<div><p>Hello <b>there</b></p></div>'), '<div><p>Hello <b>there</b></p></div>');
   });
-  it('should pass through all markup if allowedTags and allowedAttributes are set to false', function() {
-    assert.equal(sanitizeHtml('<div><wiggly worms="ewww">hello</wiggly></div>', {
+  it('should pass through all markup if allowedTags and allowedAttributes are set to false', async function() {
+    assert.equal(await sanitizeHtml('<div><wiggly worms="ewww">hello</wiggly></div>', {
       allowedTags: false,
       allowedAttributes: false
     }), '<div><wiggly worms="ewww">hello</wiggly></div>');
   });
-  it('should respect text nodes at top level', function() {
-    assert.equal(sanitizeHtml('Blah blah blah<p>Whee!</p>'), 'Blah blah blah<p>Whee!</p>');
+  it('should respect text nodes at top level', async function() {
+    assert.equal(await sanitizeHtml('Blah blah blah<p>Whee!</p>'), 'Blah blah blah<p>Whee!</p>');
   });
-  it('should reject markup not whitelisted without destroying its text', function() {
-    assert.equal(sanitizeHtml('<div><wiggly>Hello</wiggly></div>'), '<div>Hello</div>');
+  it('should reject markup not whitelisted without destroying its text', async function() {
+    assert.equal(await sanitizeHtml('<div><wiggly>Hello</wiggly></div>'), '<div>Hello</div>');
   });
-  it('should accept a custom list of allowed tags', function() {
-    assert.equal(sanitizeHtml('<blue><red><green>Cheese</green></red></blue>', { allowedTags: [ 'blue', 'green' ] }), '<blue><green>Cheese</green></blue>');
+  it('should accept a custom list of allowed tags', async function() {
+    assert.equal(await sanitizeHtml('<blue><red><green>Cheese</green></red></blue>', { allowedTags: [ 'blue', 'green' ] }), '<blue><green>Cheese</green></blue>');
   });
-  it('should reject attributes not whitelisted', function() {
-    assert.equal(sanitizeHtml('<a href="foo.html" whizbang="whangle">foo</a>'), '<a href="foo.html">foo</a>');
+  it('should reject attributes not whitelisted', async function() {
+    assert.equal(await sanitizeHtml('<a href="foo.html" whizbang="whangle">foo</a>'), '<a href="foo.html">foo</a>');
   });
-  it('should accept a custom list of allowed attributes per element', function() {
-    assert.equal(sanitizeHtml('<a href="foo.html" whizbang="whangle">foo</a>', { allowedAttributes: { a: [ 'href', 'whizbang' ] } } ), '<a href="foo.html" whizbang="whangle">foo</a>');
+  it('should accept a custom list of allowed attributes per element', async function() {
+    assert.equal(await sanitizeHtml('<a href="foo.html" whizbang="whangle">foo</a>', { allowedAttributes: { a: [ 'href', 'whizbang' ] } } ), '<a href="foo.html" whizbang="whangle">foo</a>');
   });
-  it('should clean up unclosed img tags and p tags', function() {
-    assert.equal(sanitizeHtml('<img src="foo.jpg"><p>Whee<p>Again<p>Wow<b>cool</b>', { allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ])}), '<img src="foo.jpg" /><p>Whee</p><p>Again</p><p>Wow<b>cool</b></p>');
+  it('should clean up unclosed img tags and p tags', async function() {
+    assert.equal(await sanitizeHtml('<img src="foo.jpg"><p>Whee<p>Again<p>Wow<b>cool</b>', { allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ])}), '<img src="foo.jpg" /><p>Whee</p><p>Again</p><p>Wow<b>cool</b></p>');
   });
-  it('should reject hrefs that are not relative, ftp, http, https or mailto', function() {
-    assert.equal(sanitizeHtml('<a href="http://google.com">google</a><a href="https://google.com">https google</a><a href="ftp://example.com">ftp</a><a href="mailto:test@test.com">mailto</a><a href="/relative.html">relative</a><a href="javascript:alert(0)">javascript</a>'), '<a href="http://google.com">google</a><a href="https://google.com">https google</a><a href="ftp://example.com">ftp</a><a href="mailto:test@test.com">mailto</a><a href="/relative.html">relative</a><a>javascript</a>');
+  it('should reject hrefs that are not relative, ftp, http, https or mailto', async function() {
+    assert.equal(await sanitizeHtml('<a href="http://google.com">google</a><a href="https://google.com">https google</a><a href="ftp://example.com">ftp</a><a href="mailto:test@test.com">mailto</a><a href="/relative.html">relative</a><a href="javascript:alert(0)">javascript</a>'), '<a href="http://google.com">google</a><a href="https://google.com">https google</a><a href="ftp://example.com">ftp</a><a href="mailto:test@test.com">mailto</a><a href="/relative.html">relative</a><a>javascript</a>');
   });
-  it('should cope identically with capitalized attributes and tags and should tolerate capitalized schemes', function() {
-    assert.equal(sanitizeHtml('<A HREF="http://google.com">google</a><a href="HTTPS://google.com">https google</a><a href="ftp://example.com">ftp</a><a href="mailto:test@test.com">mailto</a><a href="/relative.html">relative</a><a href="javascript:alert(0)">javascript</a>'), '<a href="http://google.com">google</a><a href="HTTPS://google.com">https google</a><a href="ftp://example.com">ftp</a><a href="mailto:test@test.com">mailto</a><a href="/relative.html">relative</a><a>javascript</a>');
+  it('should cope identically with capitalized attributes and tags and should tolerate capitalized schemes', async function() {
+    assert.equal(await sanitizeHtml('<A HREF="http://google.com">google</a><a href="HTTPS://google.com">https google</a><a href="ftp://example.com">ftp</a><a href="mailto:test@test.com">mailto</a><a href="/relative.html">relative</a><a href="javascript:alert(0)">javascript</a>'), '<a href="http://google.com">google</a><a href="HTTPS://google.com">https google</a><a href="ftp://example.com">ftp</a><a href="mailto:test@test.com">mailto</a><a href="/relative.html">relative</a><a>javascript</a>');
   });
-  it('should drop the content of script elements', function() {
-    assert.equal(sanitizeHtml('<script>alert("ruhroh!");</script><p>Paragraph</p>'), '<p>Paragraph</p>');
+  it('should drop the content of script elements', async function() {
+    assert.equal(await sanitizeHtml('<script>alert("ruhroh!");</script><p>Paragraph</p>'), '<p>Paragraph</p>');
   });
-  it('should drop the content of style elements', function() {
-    assert.equal(sanitizeHtml('<style>.foo { color: blue; }</style><p>Paragraph</p>'), '<p>Paragraph</p>');
+  it('should drop the content of style elements', async function() {
+    assert.equal(await sanitizeHtml('<style>.foo { color: blue; }</style><p>Paragraph</p>'), '<p>Paragraph</p>');
   });
-  it('should drop the content of textarea elements', function() {
-    assert.equal(sanitizeHtml('<textarea>Nifty</textarea><p>Paragraph</p>'), '<p>Paragraph</p>');
+  it('should drop the content of textarea elements', async function() {
+    assert.equal(await sanitizeHtml('<textarea>Nifty</textarea><p>Paragraph</p>'), '<p>Paragraph</p>');
   });
-  it('should drop the content of textarea elements but keep the closing parent tag, when nested', function() {
-    assert.equal(sanitizeHtml('<p>Paragraph<textarea>Nifty</textarea></p>'), '<p>Paragraph</p>');
+  it('should drop the content of textarea elements but keep the closing parent tag, when nested', async function() {
+    assert.equal(await sanitizeHtml('<p>Paragraph<textarea>Nifty</textarea></p>'), '<p>Paragraph</p>');
   });
-  it('should retain the content of fibble elements by default', function() {
-    assert.equal(sanitizeHtml('<fibble>Nifty</fibble><p>Paragraph</p>'), 'Nifty<p>Paragraph</p>');
+  it('should retain the content of fibble elements by default', async function() {
+    assert.equal(await sanitizeHtml('<fibble>Nifty</fibble><p>Paragraph</p>'), 'Nifty<p>Paragraph</p>');
   });
-  it('should discard the content of fibble elements if specified for nonTextTags', function() {
-    assert.equal(sanitizeHtml('<fibble>Nifty</fibble><p>Paragraph</p>', { nonTextTags: [ 'fibble' ] }), '<p>Paragraph</p>');
+  it('should discard the content of fibble elements if specified for nonTextTags', async function() {
+    assert.equal(await sanitizeHtml('<fibble>Nifty</fibble><p>Paragraph</p>', { nonTextTags: [ 'fibble' ] }), '<p>Paragraph</p>');
   });
-  it('should retain allowed tags within a fibble element if fibble is not specified for nonTextTags', function() {
-    assert.equal(sanitizeHtml('<fibble>Ni<em>f</em>ty</fibble><p>Paragraph</p>', {}), 'Ni<em>f</em>ty<p>Paragraph</p>');
+  it('should retain allowed tags within a fibble element if fibble is not specified for nonTextTags', async function() {
+    assert.equal(await sanitizeHtml('<fibble>Ni<em>f</em>ty</fibble><p>Paragraph</p>', {}), 'Ni<em>f</em>ty<p>Paragraph</p>');
   });
-  it('should discard allowed tags within a fibble element if fibble is specified for nonTextTags', function() {
-    assert.equal(sanitizeHtml('<fibble>Ni<em>f</em>ty</fibble><p>Paragraph</p>', { nonTextTags: [ 'fibble' ] }), '<p>Paragraph</p>');
+  it('should discard allowed tags within a fibble element if fibble is specified for nonTextTags', async function() {
+    assert.equal(await sanitizeHtml('<fibble>Ni<em>f</em>ty</fibble><p>Paragraph</p>', { nonTextTags: [ 'fibble' ] }), '<p>Paragraph</p>');
   });
-  it('should preserve textarea content if textareas are allowed', function() {
-    assert.equal(sanitizeHtml('<textarea>Nifty</textarea><p>Paragraph</p>', {
+  it('should preserve textarea content if textareas are allowed', async function() {
+    assert.equal(await sanitizeHtml('<textarea>Nifty</textarea><p>Paragraph</p>', {
       allowedTags: [ 'textarea', 'p' ]
     }), '<textarea>Nifty</textarea><p>Paragraph</p>');
   });
-  it('should preserve entities as such', function() {
-    assert.equal(sanitizeHtml('<a name="&lt;silly&gt;">&lt;Kapow!&gt;</a>'), '<a name="&lt;silly&gt;">&lt;Kapow!&gt;</a>');
+  it('should preserve entities as such', async function() {
+    assert.equal(await sanitizeHtml('<a name="&lt;silly&gt;">&lt;Kapow!&gt;</a>'), '<a name="&lt;silly&gt;">&lt;Kapow!&gt;</a>');
   });
-  it('should dump comments', function() {
-    assert.equal(sanitizeHtml('<p><!-- Blah blah -->Whee</p>'), '<p>Whee</p>');
+  it('should dump comments', async function() {
+    assert.equal(await sanitizeHtml('<p><!-- Blah blah -->Whee</p>'), '<p>Whee</p>');
   });
-  it('should dump a sneaky encoded javascript url', function() {
-    assert.equal(sanitizeHtml('<a href="&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;">Hax</a>'), '<a>Hax</a>');
+  it('should dump a sneaky encoded javascript url', async function() {
+    assert.equal(await sanitizeHtml('<a href="&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;">Hax</a>'), '<a>Hax</a>');
   });
-  it('should dump an uppercase javascript url', function() {
-    assert.equal(sanitizeHtml('<a href="JAVASCRIPT:alert(\'foo\')">Hax</a>'), '<a>Hax</a>');
+  it('should dump an uppercase javascript url', async function() {
+    assert.equal(await sanitizeHtml('<a href="JAVASCRIPT:alert(\'foo\')">Hax</a>'), '<a>Hax</a>');
   });
-  it('should dump a javascript URL with a comment in the middle (probably only respected by browsers in XML data islands, but just in case someone enables those)', function() {
-    assert.equal(sanitizeHtml('<a href="java<!-- -->script:alert(\'foo\')">Hax</a>'), '<a>Hax</a>');
+  it('should dump a javascript URL with a comment in the middle (probably only respected by browsers in XML data islands, but just in case someone enables those)', async function() {
+    assert.equal(await sanitizeHtml('<a href="java<!-- -->script:alert(\'foo\')">Hax</a>'), '<a>Hax</a>');
   });
-  it('should not mess up a hashcode with a : in it', function() {
-    assert.equal(sanitizeHtml('<a href="awesome.html#this:stuff">Hi</a>'), '<a href="awesome.html#this:stuff">Hi</a>');
+  it('should not mess up a hashcode with a : in it', async function() {
+    assert.equal(await sanitizeHtml('<a href="awesome.html#this:stuff">Hi</a>'), '<a href="awesome.html#this:stuff">Hi</a>');
   });
-  it('should dump character codes 1-32 before testing scheme', function() {
-    assert.equal(sanitizeHtml('<a href="java\0&#14;\t\r\n script:alert(\'foo\')">Hax</a>'), '<a>Hax</a>');
+  it('should dump character codes 1-32 before testing scheme', async function() {
+    assert.equal(await sanitizeHtml('<a href="java\0&#14;\t\r\n script:alert(\'foo\')">Hax</a>'), '<a>Hax</a>');
   });
-  it('should dump character codes 1-32 even when escaped with padding rather than trailing ;', function() {
-    assert.equal(sanitizeHtml('<a href="java&#0000001script:alert(\'foo\')">Hax</a>'), '<a>Hax</a>');
+  it('should dump character codes 1-32 even when escaped with padding rather than trailing ;', async function() {
+    assert.equal(await sanitizeHtml('<a href="java&#0000001script:alert(\'foo\')">Hax</a>'), '<a>Hax</a>');
     // This one is weird, but the browser does not interpret it
     // as a scheme, so we're OK. That character is 65535, not null. I
     // think it's a limitation of the entities module
-    assert.equal(sanitizeHtml('<a href="java&#0000000script:alert(\'foo\')">Hax</a>'), '<a href="java�script:alert(\'foo\')">Hax</a>');
+    assert.equal(await sanitizeHtml('<a href="java&#0000000script:alert(\'foo\')">Hax</a>'), '<a href="java�script:alert(\'foo\')">Hax</a>');
   });
-  it('should still like nice schemes', function() {
-    assert.equal(sanitizeHtml('<a href="http://google.com/">Hi</a>'), '<a href="http://google.com/">Hi</a>');
+  it('should still like nice schemes', async function() {
+    assert.equal(await sanitizeHtml('<a href="http://google.com/">Hi</a>'), '<a href="http://google.com/">Hi</a>');
   });
-  it('should still like nice relative URLs', function() {
-    assert.equal(sanitizeHtml('<a href="hello.html">Hi</a>'), '<a href="hello.html">Hi</a>');
+  it('should still like nice relative URLs', async function() {
+    assert.equal(await sanitizeHtml('<a href="hello.html">Hi</a>'), '<a href="hello.html">Hi</a>');
   });
-  it('should replace ol to ul', function() {
-    assert.equal(sanitizeHtml('<ol><li>Hello world</li></ol>', { transformTags: {ol: 'ul'} }), '<ul><li>Hello world</li></ul>');
+  it('should replace ol to ul', async function() {
+    assert.equal(await sanitizeHtml('<ol><li>Hello world</li></ol>', { transformTags: {ol: 'ul'} }), '<ul><li>Hello world</li></ul>');
   });
-  it('should replace ol to ul and add class attribute with foo value', function() {
-    assert.equal(sanitizeHtml('<ol><li>Hello world</li></ol>', { transformTags: {ol: sanitizeHtml.simpleTransform('ul', {class: 'foo'})}, allowedAttributes: { ul: ['class'] } }), '<ul class="foo"><li>Hello world</li></ul>');
+  it('should replace ol to ul and add class attribute with foo value', async function() {
+    assert.equal(await sanitizeHtml('<ol><li>Hello world</li></ol>', { transformTags: {ol: sanitizeHtml.simpleTransform('ul', {class: 'foo'})}, allowedAttributes: { ul: ['class'] } }), '<ul class="foo"><li>Hello world</li></ul>');
   });
-  it('should replace ol to ul, left attributes foo and bar untouched, remove baz attribute and add class attributte with foo value', function() {
-    assert.equal(sanitizeHtml('<ol foo="foo" bar="bar" baz="baz"><li>Hello world</li></ol>', { transformTags: {ol: sanitizeHtml.simpleTransform('ul', {class: 'foo'})}, allowedAttributes: { ul: ['foo', 'bar', 'class'] } }), '<ul foo="foo" bar="bar" class="foo"><li>Hello world</li></ul>');
+  it('should replace ol to ul, left attributes foo and bar untouched, remove baz attribute and add class attributte with foo value', async function() {
+    assert.equal(await sanitizeHtml('<ol foo="foo" bar="bar" baz="baz"><li>Hello world</li></ol>', { transformTags: {ol: sanitizeHtml.simpleTransform('ul', {class: 'foo'})}, allowedAttributes: { ul: ['foo', 'bar', 'class'] } }), '<ul foo="foo" bar="bar" class="foo"><li>Hello world</li></ul>');
   });
-  it('should replace ol to ul and replace all attributes to class attribute with foo value', function() {
-    assert.equal(sanitizeHtml('<ol foo="foo" bar="bar" baz="baz"><li>Hello world</li></ol>', { transformTags: {ol: sanitizeHtml.simpleTransform('ul', {class: 'foo'}, false)}, allowedAttributes: { ul: ['foo', 'bar', 'class'] } }), '<ul class="foo"><li>Hello world</li></ul>');
+  it('should replace ol to ul and replace all attributes to class attribute with foo value', async function() {
+    assert.equal(await sanitizeHtml('<ol foo="foo" bar="bar" baz="baz"><li>Hello world</li></ol>', { transformTags: {ol: sanitizeHtml.simpleTransform('ul', {class: 'foo'}, false)}, allowedAttributes: { ul: ['foo', 'bar', 'class'] } }), '<ul class="foo"><li>Hello world</li></ul>');
   });
-  it('should replace ol to ul and add attribute class with foo value and attribute bar with bar value', function() {
-    assert.equal(sanitizeHtml('<ol><li>Hello world</li></ol>', { transformTags: {ol: function(tagName, attribs){
+  it('should replace ol to ul and add attribute class with foo value and attribute bar with bar value', async function() {
+    assert.equal(await sanitizeHtml('<ol><li>Hello world</li></ol>', { transformTags: {ol: function(tagName, attribs){
       attribs.class = 'foo';
       attribs.bar = 'bar';
       return {
@@ -123,8 +124,8 @@ describe('sanitizeHtml', function() {
     }}, allowedAttributes: { ul: ['bar', 'class'] } }), '<ul class="foo" bar="bar"><li>Hello world</li></ul>');
   });
 
-  it('should replace text and attributes when they are changed by transforming function', function () {
-    assert.equal(sanitizeHtml('<a href="http://somelink">some text</a>', { transformTags: {a: function (tagName, attribs) {
+  it('should replace text and attributes when they are changed by transforming function', async function () {
+    assert.equal(await sanitizeHtml('<a href="http://somelink">some text</a>', { transformTags: {a: function (tagName, attribs) {
       return {
         tagName: tagName,
         attribs: attribs,
@@ -132,8 +133,8 @@ describe('sanitizeHtml', function() {
       }
     }}}), '<a href="http://somelink"></a>');
   });
-  it('should replace text and attributes when they are changed by transforming function and textFilter is set', function () {
-    assert.equal(sanitizeHtml('<a href="http://somelink">some text</a>', { transformTags: {a: function (tagName, attribs) {
+  it('should replace text and attributes when they are changed by transforming function and textFilter is set', async function () {
+    assert.equal(await sanitizeHtml('<a href="http://somelink">some text</a>', { transformTags: {a: function (tagName, attribs) {
       return {
         tagName: tagName,
         attribs: attribs,
@@ -144,8 +145,8 @@ describe('sanitizeHtml', function() {
     }}), '<a href="http://somelink">some_text_need"to&lt;be&gt;filtered</a>');
   });
 
-  it('should add new text when not initially set and replace attributes when they are changed by transforming function', function () {
-    assert.equal(sanitizeHtml('<a href="http://somelink"></a>', { transformTags: {a: function (tagName, attribs) {
+  it('should add new text when not initially set and replace attributes when they are changed by transforming function', async function () {
+    assert.equal(await sanitizeHtml('<a href="http://somelink"></a>', { transformTags: {a: function (tagName, attribs) {
       return {
         tagName: tagName,
         attribs: attribs,
@@ -154,8 +155,8 @@ describe('sanitizeHtml', function() {
     }}}), '<a href="http://somelink">some new text</a>');
   });
 
-  it('should preserve text when initially set and replace attributes when they are changed by transforming function', function () {
-    assert.equal(sanitizeHtml('<a href="http://somelink">some initial text</a>', { transformTags: {a: function (tagName, attribs) {
+  it('should preserve text when initially set and replace attributes when they are changed by transforming function', async function () {
+    assert.equal(await sanitizeHtml('<a href="http://somelink">some initial text</a>', { transformTags: {a: function (tagName, attribs) {
       return {
         tagName: tagName,
         attribs: attribs
@@ -163,62 +164,62 @@ describe('sanitizeHtml', function() {
     }}}), '<a href="http://somelink">some initial text</a>');
   });
 
-  it('should skip an empty link', function() {
-     assert.strictEqual(
-     sanitizeHtml('<p>This is <a href="http://www.linux.org"></a><br/>Linux</p>', {
-             exclusiveFilter: function (frame) {
-                 return frame.tag === 'a' && !frame.text.trim();
-             }
-         }),
-         '<p>This is <br />Linux</p>'
-        );
-    });
+  // it('should skip an empty link', async function() {
+  //    assert.strictEqual(
+  //    await sanitizeHtml('<p>This is <a href="http://www.linux.org"></a><br/>Linux</p>', {
+  //            exclusiveFilter: function (frame) {
+  //                return frame.tag === 'a' && !frame.text.trim();
+  //            }
+  //        }),
+  //        '<p>This is <br />Linux</p>'
+  //       );
+  //   });
 
-    it("Should expose a node's inner text and inner HTML to the filter", function() {
-        assert.strictEqual(
-            sanitizeHtml('<p>12<a href="http://www.linux.org"><br/>3<br></a><span>4</span></p>', {
-                exclusiveFilter : function(frame) {
-                    if (frame.tag === 'p') {
-                        assert.strictEqual(frame.text, '124');
-                    } else if (frame.tag === 'a') {
-                        assert.strictEqual(frame.text, '3');
-                        return true;
-                    } else if (frame.tag === 'br') {
-                        assert.strictEqual(frame.text, '');
-                    } else {
-                        assert.fail('p, a, br', frame.tag);
-                    }
-                    return false;
-                }
-            }),
-            '<p>124</p>'
-        );
-    });
+    // it("Should expose a node's inner text and inner HTML to the filter", async function() {
+    //     assert.strictEqual(
+    //         await sanitizeHtml('<p>12<a href="http://www.linux.org"><br/>3<br></a><span>4</span></p>', {
+    //             exclusiveFilter : function(frame) {
+    //                 if (frame.tag === 'p') {
+    //                     assert.strictEqual(frame.text, '124');
+    //                 } else if (frame.tag === 'a') {
+    //                     assert.strictEqual(frame.text, '3');
+    //                     return true;
+    //                 } else if (frame.tag === 'br') {
+    //                     assert.strictEqual(frame.text, '');
+    //                 } else {
+    //                     assert.fail('p, a, br', frame.tag);
+    //                 }
+    //                 return false;
+    //             }
+    //         }),
+    //         '<p>124</p>'
+    //     );
+    // });
 
-  it('Should collapse nested empty elements', function() {
-        assert.strictEqual(
-            sanitizeHtml('<p><a href="http://www.linux.org"><br/></a></p>', {
-                    exclusiveFilter : function(frame) {
-                        return (frame.tag === 'a' || frame.tag === 'p' ) && !frame.text.trim();
-                    }
-                }),
-            ''
-        );
-  });
-  it('Exclusive filter should not affect elements which do not match the filter condition', function () {
-      assert.strictEqual(
-          sanitizeHtml('I love <a href="www.linux.org" target="_hplink">Linux</a> OS',
-              {
-                  exclusiveFilter: function (frame) {
-                      return (frame.tag === 'a') && !frame.text.trim();
-                  }
-              }),
-          'I love <a href="www.linux.org" target="_hplink">Linux</a> OS'
-      );
-  });
-  it('should disallow data URLs with default allowedSchemes', function() {
+  // it('Should collapse nested empty elements', async function() {
+  //       assert.strictEqual(
+  //           await sanitizeHtml('<p><a href="http://www.linux.org"><br/></a></p>', {
+  //                   exclusiveFilter : function(frame) {
+  //                       return (frame.tag === 'a' || frame.tag === 'p' ) && !frame.text.trim();
+  //                   }
+  //               }),
+  //           ''
+  //       );
+  // });
+  // it('Exclusive filter should not affect elements which do not match the filter condition', async function() {
+  //     assert.strictEqual(
+  //         await sanitizeHtml('I love <a href="www.linux.org" target="_hplink">Linux</a> OS',
+  //             {
+  //                 exclusiveFilter: function (frame) {
+  //                     return (frame.tag === 'a') && !frame.text.trim();
+  //                 }
+  //             }),
+  //         'I love <a href="www.linux.org" target="_hplink">Linux</a> OS'
+  //     );
+  // });
+  it('should disallow data URLs with default allowedSchemes', async function() {
     assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         // teeny-tiny valid transparent GIF in a data URL
         '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />',
         {
@@ -228,9 +229,9 @@ describe('sanitizeHtml', function() {
       '<img />'
     );
   });
-  it('should allow data URLs with custom allowedSchemes', function() {
+  it('should allow data URLs with custom allowedSchemes', async function() {
     assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         // teeny-tiny valid transparent GIF in a data URL
         '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />',
         {
@@ -241,9 +242,9 @@ describe('sanitizeHtml', function() {
       '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />'
     );
   });
-  it('should allow specific classes when whitelisted with allowedClasses', function() {
+  it('should allow specific classes when whitelisted with allowedClasses', async function() {
     assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         '<p class="nifty simple dippy">whee</p>',
         {
           allowedTags: [ 'p' ],
@@ -255,9 +256,9 @@ describe('sanitizeHtml', function() {
       '<p class="nifty">whee</p>'
     );
   });
-  it('should allow defining schemes on a per-tag basis', function() {
+  it('should allow defining schemes on a per-tag basis', async function() {
     assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         // teeny-tiny valid transparent GIF in a data URL
         '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" /><a href="https://www.example.com"></a>',
         {
@@ -272,7 +273,7 @@ describe('sanitizeHtml', function() {
       '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" /><a href="https://www.example.com"></a>'
     );
     assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         // teeny-tiny valid transparent GIF in a data URL
         '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" /><a href="https://www.example.com"></a>',
         {
@@ -287,9 +288,9 @@ describe('sanitizeHtml', function() {
       '<img /><a href="https://www.example.com"></a>'
     );
   });
-  it('should not act weird when the class attribute is empty', function() {
+  it('should not act weird when the class attribute is empty', async function() {
     assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         '<p class="">whee</p>',
         {
           allowedTags: [ 'p' ],
@@ -301,17 +302,17 @@ describe('sanitizeHtml', function() {
       '<p>whee</p>'
     );
   });
-  it('should not crash on bad markup', function() {
+  it('should not crash on bad markup', async function() {
     assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         "<p a"
       ),
       ''
     );
   });
-  it('should not allow a naked = sign followed by an unrelated attribute to result in one merged attribute with unescaped double quote marks', function() {
+  it('should not allow a naked = sign followed by an unrelated attribute to result in one merged attribute with unescaped double quote marks', async function() {
     assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         '<IMG SRC= onmouseover="alert(\'XSS\');">',
         {
           allowedTags: [ 'img' ],
@@ -326,9 +327,9 @@ describe('sanitizeHtml', function() {
       '<img src="onmouseover=&quot;alert(\'XSS\');&quot;" />'
     );
   });
-  it('should allow only whitelisted attributes, but to any tags, if tag is declared as  "*"', function() {
+  it('should allow only whitelisted attributes, but to any tags, if tag is declared as  "*"', async function() {
     assert.equal(
-        sanitizeHtml(
+        await sanitizeHtml(
             '<table bgcolor="1" align="left" notlisted="0"><img src="1.gif" align="center" alt="not listed too"/></table>',
             {
               allowedTags: [ 'table', 'img' ],
@@ -340,65 +341,65 @@ describe('sanitizeHtml', function() {
         '<table bgcolor="1" align="left"><img src="1.gif" align="center" /></table>'
     );
   });
-  it('should not filter if exclusive filter does not match after transforming tags', function() {
+  // it('should not filter if exclusive filter does not match after transforming tags', async function() {
+  //   assert.equal(
+  //     await sanitizeHtml(
+  //       '<a href="test.html">test</a>',
+  //       {
+  //         allowedTags: [ 'a' ],
+  //         allowedAttributes: { a: ['href', 'target']},
+  //         transformTags: {
+  //           'a': function (tagName, attribs) {
+  //             if (!attribs.href)
+  //               return false;
+  //             return {
+  //               tagName: tagName,
+  //               attribs: {
+  //                 target: '_blank',
+  //                 href: attribs.href
+  //               }
+  //             };
+  //           }
+  //         },
+  //         exclusiveFilter: function(frame) {
+  //           return frame.tag === 'a' && frame.text.trim() == 'blah';
+  //         }
+  //       }
+  //     ),
+  //     '<a target="_blank" href="test.html">test</a>'
+  //   )
+  // });
+  // it('should filter if exclusive filter does match after transforming tags', async function() {
+  //   assert.equal(
+  //     await sanitizeHtml(
+  //       '<a href="test.html">blah</a>',
+  //       {
+  //         allowedTags: [ 'a' ],
+  //         allowedAttributes: {a: ['href', 'target']},
+  //         transformTags: {
+  //           'a': function (tagName, attribs) {
+  //             if (!attribs.href)
+  //               return false;
+  //             return {
+  //               tagName: tagName,
+  //               attribs: {
+  //                 target: '_blank',
+  //                 href: attribs.href
+  //               }
+  //             };
+  //           }
+  //         },
+  //         exclusiveFilter: function(frame) {
+  //           return frame.tag === 'a' && frame.text.trim() == 'blah';
+  //         }
+  //       }
+  //     ),
+  //     ''
+  //   );
+  // });
+  it('should allow transform on all tags using \'*\'', async function() {
     assert.equal(
-      sanitizeHtml(
-        '<a href="test.html">test</a>',
-        {
-          allowedTags: [ 'a' ],
-          allowedAttributes: { a: ['href', 'target']},
-          transformTags: {
-            'a': function (tagName, attribs) {
-              if (!attribs.href)
-                return false;
-              return {
-                tagName: tagName,
-                attribs: {
-                  target: '_blank',
-                  href: attribs.href
-                }
-              };
-            }
-          },
-          exclusiveFilter: function(frame) {
-            return frame.tag === 'a' && frame.text.trim() == 'blah';
-          }
-        }
-      ),
-      '<a target="_blank" href="test.html">test</a>'
-    )
-  });
-  it('should filter if exclusive filter does match after transforming tags', function() {
-    assert.equal(
-      sanitizeHtml(
-        '<a href="test.html">blah</a>',
-        {
-          allowedTags: [ 'a' ],
-          allowedAttributes: {a: ['href', 'target']},
-          transformTags: {
-            'a': function (tagName, attribs) {
-              if (!attribs.href)
-                return false;
-              return {
-                tagName: tagName,
-                attribs: {
-                  target: '_blank',
-                  href: attribs.href
-                }
-              };
-            }
-          },
-          exclusiveFilter: function(frame) {
-            return frame.tag === 'a' && frame.text.trim() == 'blah';
-          }
-        }
-      ),
-      ''
-    );
-  });
-  it('should allow transform on all tags using \'*\'', function () {
-    assert.equal(
-      sanitizeHtml(
+      await sanitizeHtml(
         '<p>Text</p>',
         {
           allowedTags: [ 'p' ],
@@ -418,55 +419,55 @@ describe('sanitizeHtml', function() {
       '<p style="text-align:center">Text</p>'
     );
   });
-  it('should not be faked out by double <', function() {
+  it('should not be faked out by double <', async function() {
     assert.equal(
-      sanitizeHtml('<<img src="javascript:evil"/>img src="javascript:evil"/>'
+      await sanitizeHtml('<<img src="javascript:evil"/>img src="javascript:evil"/>'
       ),
       '&lt;img src="javascript:evil"/&gt;'
     );
     assert.equal(
-      sanitizeHtml('<<a href="javascript:evil"/>a href="javascript:evil"/>'
+      await sanitizeHtml('<<a href="javascript:evil"/>a href="javascript:evil"/>'
       ),
       '&lt;<a>a href="javascript:evil"/&gt;</a>'
     );
   });
-  it('should allow attributes to be specified as globs', function() {
+  it('should allow attributes to be specified as globs', async function() {
     assert.equal(
-      sanitizeHtml('<a data-target="#test" data-foo="hello">click me</a>', {
+      await sanitizeHtml('<a data-target="#test" data-foo="hello">click me</a>', {
         allowedTags: [ 'a' ],
         allowedAttributes: { a: ['data-*'] }
       }), '<a data-target="#test" data-foo="hello">click me</a>'
     );
     assert.equal(
-      sanitizeHtml('<a data-target="#test" data-my-foo="hello">click me</a>', {
+      await sanitizeHtml('<a data-target="#test" data-my-foo="hello">click me</a>', {
         allowedTags: [ 'a' ],
         allowedAttributes: { a: ['data-*-foo'] }
       }), '<a data-my-foo="hello">click me</a>'
     );
   });
-  it('should quote regex chars in attributes specified as globs', function() {
+  it('should quote regex chars in attributes specified as globs', async function() {
     assert.equal(
-      sanitizeHtml('<a data-b.c="#test" data-bcc="remove this">click me</a>', {
+      await sanitizeHtml('<a data-b.c="#test" data-bcc="remove this">click me</a>', {
         allowedTags: [ 'a' ],
         allowedAttributes: { a: ['data-b.*'] }
       }), '<a data-b.c="#test">click me</a>'
     );
   });
-  it('should not escape inner content of script and style tags (when allowed)', function() {
+  it('should not escape inner content of script and style tags (when allowed)', async function() {
     assert.equal(
-      sanitizeHtml('<div>"normal text"</div><script>"this is code"</script>', {
+      await sanitizeHtml('<div>"normal text"</div><script>"this is code"</script>', {
         allowedTags: [ 'script' ]
       }), '"normal text"<script>"this is code"</script>'
     );
     assert.equal(
-      sanitizeHtml('<div>"normal text"</div><style>body { background-image: url("image.test"); }</style>', {
+      await sanitizeHtml('<div>"normal text"</div><style>body { background-image: url("image.test"); }</style>', {
         allowedTags: [ 'style' ]
       }), '"normal text"<style>body { background-image: url("image.test"); }</style>'
     );
   });
-  it('should not unescape escapes found inside script tags', function() {
+  it('should not unescape escapes found inside script tags', async function() {
     assert.equal(
-      sanitizeHtml('<script>alert("&quot;This is cool but just ironically so I quoted it&quot;")</script>',
+      await sanitizeHtml('<script>alert("&quot;This is cool but just ironically so I quoted it&quot;")</script>',
         {
           allowedTags: [ 'script' ]
         }
@@ -474,25 +475,25 @@ describe('sanitizeHtml', function() {
       '<script>alert("&quot;This is cool but just ironically so I quoted it&quot;")</script>'
     )
   });
-  it('should process text nodes with provided function', function() {
+  it('should process text nodes with provided function', async function() {
     assert.equal(
-      sanitizeHtml('"normal text this should be removed"', {
+      await sanitizeHtml('"normal text this should be removed"', {
         textFilter: function(text) {
           return text.replace(' this should be removed', '');
         }
       }), '"normal text"'
     );
   });
-  it('should respect htmlparser2 options when passed in', function() {
+  it('should respect htmlparser2 options when passed in', async function() {
     assert.equal(
-      sanitizeHtml("<Archer><Sterling>I am</Sterling></Archer>", {
+      await sanitizeHtml("<Archer><Sterling>I am</Sterling></Archer>", {
         allowedTags: false,
         allowedAttributes: false,
       }),
       "<archer><sterling>I am</sterling></archer>"
     );
     assert.equal(
-      sanitizeHtml("<Archer><Sterling>I am</Sterling></Archer>", {
+      await sanitizeHtml("<Archer><Sterling>I am</Sterling></Archer>", {
         allowedTags: false,
         allowedAttributes: false,
         parser: {
@@ -502,88 +503,88 @@ describe('sanitizeHtml', function() {
       "<Archer><Sterling>I am</Sterling></Archer>"
     );
   });
-  it('should not crash due to tag names that are properties of the universal Object prototype', function() {
+  it('should not crash due to tag names that are properties of the universal Object prototype', async function() {
     assert.equal(
-      sanitizeHtml("!<__proto__>!"),
+      await sanitizeHtml("!<__proto__>!"),
     "!!");
   });
-  it('should correctly maintain escaping when allowing a nonTextTags tag other than script or style', function() {
+  it('should correctly maintain escaping when allowing a nonTextTags tag other than script or style', async function() {
     assert.equal(
-      sanitizeHtml('!<textarea>&lt;/textarea&gt;&lt;svg/onload=prompt`xs`&gt;</textarea>!',
+      await sanitizeHtml('!<textarea>&lt;/textarea&gt;&lt;svg/onload=prompt`xs`&gt;</textarea>!',
         { allowedTags: [ 'textarea' ] }
       ), '!<textarea>&lt;/textarea&gt;&lt;svg/onload=prompt`xs`&gt;</textarea>!'
     );
   });
-  it('should allow protocol relative links by default', function() {
+  it('should allow protocol relative links by default', async function() {
     assert.equal(
-      sanitizeHtml('<a href="//cnn.com/example">test</a>'),
+      await sanitizeHtml('<a href="//cnn.com/example">test</a>'),
       '<a href="//cnn.com/example">test</a>'
     );
   });
-  it('should not allow protocol relative links when allowProtocolRelative is false', function() {
+  it('should not allow protocol relative links when allowProtocolRelative is false', async function() {
     assert.equal(
-      sanitizeHtml('<a href="//cnn.com/example">test</a>', { allowProtocolRelative: false }),
+      await sanitizeHtml('<a href="//cnn.com/example">test</a>', { allowProtocolRelative: false }),
       '<a>test</a>'
     );
     assert.equal(
-      sanitizeHtml('<a href="/\\cnn.com/example">test</a>', { allowProtocolRelative: false }),
+      await sanitizeHtml('<a href="/\\cnn.com/example">test</a>', { allowProtocolRelative: false }),
       '<a>test</a>'
     );
     assert.equal(
-      sanitizeHtml('<a href="\\\\cnn.com/example">test</a>', { allowProtocolRelative: false }),
+      await sanitizeHtml('<a href="\\\\cnn.com/example">test</a>', { allowProtocolRelative: false }),
       '<a>test</a>'
     );
     assert.equal(
-      sanitizeHtml('<a href="\\/cnn.com/example">test</a>', { allowProtocolRelative: false }),
+      await sanitizeHtml('<a href="\\/cnn.com/example">test</a>', { allowProtocolRelative: false }),
       '<a>test</a>'
     );
   });
-  it('should still allow regular relative URLs when allowProtocolRelative is false', function() {
+  it('should still allow regular relative URLs when allowProtocolRelative is false', async function() {
     assert.equal(
-      sanitizeHtml('<a href="/welcome">test</a>', { allowProtocolRelative: false }),
+      await sanitizeHtml('<a href="/welcome">test</a>', { allowProtocolRelative: false }),
       '<a href="/welcome">test</a>'
     );
   });
-  it('should discard srcset by default', function() {
+  it('should discard srcset by default', async function() {
     assert.equal(
-      sanitizeHtml('<img src="fallback.jpg" srcset="foo.jpg 100w 2x, bar.jpg 200w 1x" />', {
+      await sanitizeHtml('<img src="fallback.jpg" srcset="foo.jpg 100w 2x, bar.jpg 200w 1x" />', {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ])
       }),
       '<img src="fallback.jpg" />'
     );
   });
-  it('should accept srcset if allowed', function() {
+  it('should accept srcset if allowed', async function() {
     assert.equal(
-      sanitizeHtml('<img src="fallback.jpg" srcset="foo.jpg 100w 2x, bar.jpg 200w 1x" />', {
+      await sanitizeHtml('<img src="fallback.jpg" srcset="foo.jpg 100w 2x, bar.jpg 200w 1x" />', {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ]),
         allowedAttributes: { img: [ 'src', 'srcset' ] }
       }),
       '<img src="fallback.jpg" srcset="foo.jpg 100w 2x, bar.jpg 200w 1x" />'
     );
   });
-  it('should drop bogus srcset', function() {
+  it('should drop bogus srcset', async function() {
     assert.equal(
-      sanitizeHtml('<img src="fallback.jpg" srcset="foo.jpg 100w 2x, bar.jpg 200w 1x, javascript:alert(1) 100w 2x" />', {
+      await sanitizeHtml('<img src="fallback.jpg" srcset="foo.jpg 100w 2x, bar.jpg 200w 1x, javascript:alert(1) 100w 2x" />', {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ]),
         allowedAttributes: { img: [ 'src', 'srcset' ] }
       }),
       '<img src="fallback.jpg" srcset="foo.jpg 100w 2x, bar.jpg 200w 1x" />'
     );
   });
-  it('drop attribute names with meta-characters', function() {
+  it('drop attribute names with meta-characters', async function() {
     assert.equal(
-      sanitizeHtml('<span data-<script>alert(1)//>', {
+      await sanitizeHtml('<span data-<script>alert(1)//>', {
         allowedTags: ['span'],
         allowedAttributes: { 'span': ['data-*'] }
       }),
       '<span>alert(1)//&gt;</span>'
     );
   });
-   it('should sanitize styles correctly', function() {
+   it('should sanitize styles correctly', async function() {
     var sanitizeString = '<p dir="ltr"><strong>beste</strong><em>testestes</em><s>testestset</s><u>testestest</u></p><ul dir="ltr"> <li><u>test</u></li></ul><blockquote dir="ltr"> <ol> <li><u>​test</u></li><li><u>test</u></li><li style="text-align: right"><u>test</u></li><li style="text-align: justify"><u>test</u></li></ol> <p><u><span style="color:#00FF00">test</span></u></p><p><span style="color:#00FF00"><span style="font-size:36px">TESTETESTESTES</span></span></p></blockquote>';
     var expected = '<p dir="ltr"><strong>beste</strong><em>testestes</em><s>testestset</s><u>testestest</u></p><ul dir="ltr"> <li><u>test</u></li></ul><blockquote dir="ltr"> <ol> <li><u>​test</u></li><li><u>test</u></li><li style="text-align: right"><u>test</u></li><li style="text-align: justify"><u>test</u></li></ol> <p><u><span style="color:#00FF00">test</span></u></p><p><span style="color:#00FF00"><span style="font-size:36px">TESTETESTESTES</span></span></p></blockquote>';
     assert.equal(
-      sanitizeHtml(sanitizeString, {
+      (await sanitizeHtml(sanitizeString, {
         allowedTags: false,
         allowedAttributes: {
           '*': ["dir"],
@@ -599,21 +600,21 @@ describe('sanitizeHtml', function() {
             'font-size': [/36px/]
           }
         }
-      }).replace(/ /g,''), expected.replace(/ /g,'')
+      })).replace(/ /g,''), expected.replace(/ /g,'')
     )
   });
-  it('Should remove empty style tags', function() {
+  it('Should remove empty style tags', async function() {
     assert.equal(
-      sanitizeHtml("<span style=''></span>", {
+      await sanitizeHtml("<span style=''></span>", {
         allowedTags: false,
         allowedAttributes: false
       }),
       "<span></span>"
     );
   });
-  it('Should remote invalid styles', function() {
+  it('Should remote invalid styles', async function() {
     assert.equal(
-      sanitizeHtml("<span style='color: blue; text-align: justify'></span>", {
+      await sanitizeHtml("<span style='color: blue; text-align: justify'></span>", {
         allowedTags: false,
         allowedAttributes: {
           "span": ["style"]
@@ -627,9 +628,9 @@ describe('sanitizeHtml', function() {
       }), '<span style="color:blue"></span>'
     );
   });
-  it('Should allow a specific style from global', function() {
+  it('Should allow a specific style from global', async function() {
     assert.equal(
-      sanitizeHtml("<span style='color: yellow; text-align: center; font-family: helvetica'></span>", {
+      await sanitizeHtml("<span style='color: yellow; text-align: center; font-family: helvetica'></span>", {
         allowedTags: false,
         allowedAttributes: {
           "span": ["style"]
@@ -647,79 +648,79 @@ describe('sanitizeHtml', function() {
       }), '<span style="color:yellow;text-align:center;font-family:helvetica"></span>'
     );
   });
-  it('Should allow hostnames in an iframe that are whitelisted', function() {
+  it('Should allow hostnames in an iframe that are whitelisted', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>', {
+      await sanitizeHtml('<iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
       }), '<iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>'
     );
   });
-  it('Should remove iframe src urls that are not included in whitelisted hostnames', function() {
+  it('Should remove iframe src urls that are not included in whitelisted hostnames', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="https://www.embed.vevo.com/USUV71704255"></iframe>', {
+      await sanitizeHtml('<iframe src="https://www.embed.vevo.com/USUV71704255"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
       }), '<iframe></iframe>'
     );
   });
-  it('Should not allow iframe urls that do not have proper hostname', function() {
+  it('Should not allow iframe urls that do not have proper hostname', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="https://www.vimeo.com/embed/c2IlcS7AHxM"></iframe>', {
+      await sanitizeHtml('<iframe src="https://www.vimeo.com/embed/c2IlcS7AHxM"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
       }), '<iframe></iframe>'
     );
   });
-  it('Should allow iframe through if no hostname option is set', function() {
+  it('Should allow iframe through if no hostname option is set', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="https://www.vimeo.com/embed/c2IlcS7AHxM"></iframe>', {
+      await sanitizeHtml('<iframe src="https://www.vimeo.com/embed/c2IlcS7AHxM"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']}
       }), '<iframe src="https://www.vimeo.com/embed/c2IlcS7AHxM"></iframe>'
     );
   });
-  it('Should allow relative URLs for iframes by default', function() {
+  it('Should allow relative URLs for iframes by default', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="/foo"></iframe>', {
+      await sanitizeHtml('<iframe src="/foo"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']}
       }), '<iframe src="/foo"></iframe>'
     );
   });
-  it('Should allow relative URLs for iframes', function() {
+  it('Should allow relative URLs for iframes', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="/foo"></iframe>', {
+      await sanitizeHtml('<iframe src="/foo"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowIframeRelativeUrls: true,
       }), '<iframe src="/foo"></iframe>'
     );
   });
-  it('Should remove relative URLs for iframes', function() {
+  it('Should remove relative URLs for iframes', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="/foo"></iframe>', {
+      await sanitizeHtml('<iframe src="/foo"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowIframeRelativeUrls: false,
       }), '<iframe></iframe>'
     );
   });
-  it('Should remove relative URLs for iframes when whitelisted hostnames specified', function() {
+  it('Should remove relative URLs for iframes when whitelisted hostnames specified', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="/foo"></iframe><iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>', {
+      await sanitizeHtml('<iframe src="/foo"></iframe><iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowedIframeHostnames: ['www.youtube.com']
       }), '<iframe></iframe><iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>'
     );
   });
-  it('Should allow relative and whitelisted hostname URLs for iframes', function() {
+  it('Should allow relative and whitelisted hostname URLs for iframes', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="/foo"></iframe><iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>', {
+      await sanitizeHtml('<iframe src="/foo"></iframe><iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowIframeRelativeUrls: true,
@@ -727,27 +728,27 @@ describe('sanitizeHtml', function() {
       }), '<iframe src="/foo"></iframe><iframe src="https://www.youtube.com/embed/c2IlcS7AHxM"></iframe>'
     );
   });
-  it('Should allow protocol-relative URLs for the right domain for iframes', function() {
+  it('Should allow protocol-relative URLs for the right domain for iframes', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="//www.youtube.com/embed/c2IlcS7AHxM"></iframe>', {
+      await sanitizeHtml('<iframe src="//www.youtube.com/embed/c2IlcS7AHxM"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
       }), '<iframe src="//www.youtube.com/embed/c2IlcS7AHxM"></iframe>'
     );
   });
-  it('Should not allow protocol-relative iframe urls that do not have proper hostname', function() {
+  it('Should not allow protocol-relative iframe urls that do not have proper hostname', async function() {
     assert.equal(
-      sanitizeHtml('<iframe src="//www.vimeo.com/embed/c2IlcS7AHxM"></iframe>', {
+      await sanitizeHtml('<iframe src="//www.vimeo.com/embed/c2IlcS7AHxM"></iframe>', {
         allowedTags: ['p', 'iframe', 'a', 'img', 'i'],
         allowedAttributes: {'iframe': ['src', 'href'], 'a': ['src', 'href'], 'img': ['src']},
         allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
       }), '<iframe></iframe>'
     );
   });
-  it('Should only allow attributes to have any combination of specific values', function() {
+  it('Should only allow attributes to have any combination of specific values', async function() {
     assert.equal(
-      sanitizeHtml('<iframe name=\"IFRAME\" allowfullscreen=\"true\" sandbox=\"allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation\"></iframe>',{
+      await sanitizeHtml('<iframe name=\"IFRAME\" allowfullscreen=\"true\" sandbox=\"allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation\"></iframe>',{
         allowedTags: sanitizeHtml.defaults.allowedTags.concat( ['iframe'] ),
         allowedAttributes: {
           iframe: [
@@ -761,9 +762,9 @@ describe('sanitizeHtml', function() {
         }
       }), '<iframe allowfullscreen=\"true\" sandbox=\"allow-popups allow-same-origin allow-scripts\"></iframe>');
   });
-  it('Should only allow attributes that match a specific value', function() {
+  it('Should only allow attributes that match a specific value', async function() {
     assert.equal(
-      sanitizeHtml('<iframe sandbox=\"allow-popups allow-modals\"></iframe><iframe sandbox=\"allow-popups\"></iframe><iframe sandbox=\"allow-scripts\"></iframe>',{
+      await sanitizeHtml('<iframe sandbox=\"allow-popups allow-modals\"></iframe><iframe sandbox=\"allow-popups\"></iframe><iframe sandbox=\"allow-scripts\"></iframe>',{
         allowedTags: sanitizeHtml.defaults.allowedTags.concat( ['iframe'] ),
         allowedAttributes: {
           iframe: [
@@ -777,26 +778,26 @@ describe('sanitizeHtml', function() {
       }), '<iframe sandbox></iframe><iframe sandbox=\"allow-popups\"></iframe><iframe sandbox=\"allow-scripts\"></iframe>');
     }
   );
-  it('Should not allow cite urls that do not have an allowed scheme', function() {
+  it('Should not allow cite urls that do not have an allowed scheme', async function() {
     assert.equal(
-      sanitizeHtml('<q cite=\"http://www.google.com\">HTTP</q><q cite=\"https://www.google.com\">HTTPS</q><q cite=\"mailto://www.google.com\">MAILTO</q><q cite=\"tel://www.google.com\">TEL</q><q cite=\"ftp://www.google.com\">FTP</q><q cite=\"data://www.google.com\">DATA</q><q cite=\"ldap://www.google.com\">LDAP</q><q cite=\"acrobat://www.google.com\">ACROBAT</q><q cite=\"vbscript://www.google.com\">VBSCRIPT</q><q cite=\"file://www.google.com\">FILE</q><q cite=\"rlogin://www.google.com\">RLOGIN</q><q cite=\"webcal://www.google.com\">WEBCAL</q><q cite=\"javascript://www.google.com\">JAVASCRIPT</q><q cite=\"mms://www.google.com\">MMS</q>',{
+      await sanitizeHtml('<q cite=\"http://www.google.com\">HTTP</q><q cite=\"https://www.google.com\">HTTPS</q><q cite=\"mailto://www.google.com\">MAILTO</q><q cite=\"tel://www.google.com\">TEL</q><q cite=\"ftp://www.google.com\">FTP</q><q cite=\"data://www.google.com\">DATA</q><q cite=\"ldap://www.google.com\">LDAP</q><q cite=\"acrobat://www.google.com\">ACROBAT</q><q cite=\"vbscript://www.google.com\">VBSCRIPT</q><q cite=\"file://www.google.com\">FILE</q><q cite=\"rlogin://www.google.com\">RLOGIN</q><q cite=\"webcal://www.google.com\">WEBCAL</q><q cite=\"javascript://www.google.com\">JAVASCRIPT</q><q cite=\"mms://www.google.com\">MMS</q>',{
         allowedTags: sanitizeHtml.defaults.allowedTags.concat( ['q'] ),
         allowedAttributes: {q: [ 'cite' ]},
         allowedSchemes: sanitizeHtml.defaults.allowedSchemes.concat([ 'tel' ]),
       }), '<q cite=\"http://www.google.com\">HTTP</q><q cite=\"https://www.google.com\">HTTPS</q><q cite=\"mailto://www.google.com\">MAILTO</q><q cite=\"tel://www.google.com\">TEL</q><q cite=\"ftp://www.google.com\">FTP</q><q>DATA</q><q>LDAP</q><q>ACROBAT</q><q>VBSCRIPT</q><q>FILE</q><q>RLOGIN</q><q>WEBCAL</q><q>JAVASCRIPT</q><q>MMS</q>');
   });
-  it('Should encode &, <, > and where necessary, "', function() {
-    assert.equal(sanitizeHtml('"< & >" <span class="&#34;test&#34;">cool</span>', {
+  it('Should encode &, <, > and where necessary, "', async function() {
+    assert.equal(await sanitizeHtml('"< & >" <span class="&#34;test&#34;">cool</span>', {
       allowedTags: [ 'span' ],
       allowedAttributes: {
         span: [ 'class' ]
       }
     }), '"&lt; &amp; &gt;" <span class="&quot;test&quot;">cool</span>');
   });
-  it('Should not pass through &0; unescaped if decodeEntities is true (the default)', function() {
-    assert.equal(sanitizeHtml('<img src="<0&0;0.2&" />', {allowedTags: ['img']}), '<img src="&lt;0&amp;0;0.2&amp;" />');
+  it('Should not pass through &0; unescaped if decodeEntities is true (the default)', async function() {
+    assert.equal(await sanitizeHtml('<img src="<0&0;0.2&" />', {allowedTags: ['img']}), '<img src="&lt;0&amp;0;0.2&amp;" />');
   });
-  it('Should not double encode ampersands on HTML entities if decodeEntities is false (TODO more tests, this is too loose to rely upon)', function() {
+  it('Should not double encode ampersands on HTML entities if decodeEntities is false (TODO more tests, this is too loose to rely upon)', async function() {
     var textIn = 'This &amp; & that &reg; &#x0000A; &#10; &plusmn; OK?';
     var expectedResult = 'This &amp; &amp; that &reg; &#x0000A; &#10; &plusmn; OK?';
     var sanitizeHtmlOptions = {
@@ -804,19 +805,28 @@ describe('sanitizeHtml', function() {
         decodeEntities: false
       }
     };
-    assert.equal(sanitizeHtml(textIn, sanitizeHtmlOptions), expectedResult);
+    assert.equal(await sanitizeHtml(textIn, sanitizeHtmlOptions), expectedResult);
   });
   // TODO: make this test and similar tests for entities that are not
   // strictly valid pass, at which point decodeEntities: false is safe
   // to use.
   //
-  // it('Should not pass through &0; (a bogus entity) unescaped if decodeEntities is false', function() {
-  //   assert.equal(sanitizeHtml(
+  // it('Should not pass through &0; (a bogus entity) unescaped if decodeEntities is false', async function() {
+  //   assert.equal(await sanitizeHtml(
   //     '<img src="<0&0;0.2&" />', {
   //       allowedTags: ['img'],
   //       parser: {
   //         decodeEntities: false
   //       }
   //     }), '<img src="&lt;0&amp;0;0.2&amp;" />');
+  // });
+
+  // it('should pass through simple well-formed whitelisted markup from a stream', async function() {
+  //   const Streamify        = require('streamify-string');
+
+  //   const stream = new Streamify('<div><p>Hello <b>there</b></p></div>')
+  //   const result = await sanitizeHtml(stream)
+
+  //   assert.equal(result, '<div><p>Hello <b>there</b></p></div>');
   // });
 });

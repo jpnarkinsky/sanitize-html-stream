@@ -1,6 +1,6 @@
 {
-  "name": "sanitize-html",
-  "version": "1.20.1",
+  "name": "sanitize-html-stream",
+  "version": "1.0.0",
   "description": "Clean up user-submitted HTML, preserving whitelisted elements and whitelisted attributes on a per-element basis",
   "main": "dist/index.js",
   "files": [
@@ -9,13 +9,12 @@
   "scripts": {
     "prepare": "true",
     "build": "make clean && make all && npm run prepare && browserify dist/index.js > dist/sanitize-html.js --standalone 'sanitizeHtml'",
-    "minify": "npm run build && uglifyjs dist/sanitize-html.js > dist/sanitize-html.min.js",
-    "prepublishOnly": "make clean && npm run minify",
+    "prepublishOnly": "make clean",
     "test": "npm run prepublishOnly && mocha test/test.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/punkave/sanitize-html.git"
+    "url": "https://github.com/jpnarkinsky/sanitize-html-stream.git"
   },
   "keywords": [
     "html",
@@ -25,9 +24,10 @@
     "sanitizer",
     "apostrophe"
   ],
-  "author": "P'unk Avenue LLC",
+  "author": "Patrick Narkinsky (originally by P'unk Avenue LLC)",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.5.5",
     "chalk": "^2.4.1",
     "htmlparser2": "^3.10.0",
     "lodash.clonedeep": "^4.5.0",
@@ -37,11 +37,12 @@
     "lodash.mergewith": "^4.6.1",
     "postcss": "^7.0.5",
     "srcset": "^1.0.0",
+    "streamify-string": "^1.0.1",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
     "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
     "babelify": "^10.0.0",
     "browserify": "^16.2.3",
     "mocha": "^5.2.0",

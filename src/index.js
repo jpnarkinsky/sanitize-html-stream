@@ -7,7 +7,17 @@ var isString = require('lodash.isstring');
 var isPlainObject = require('lodash.isplainobject');
 var srcset = require('srcset');
 var postcss = require('postcss');
+var streamifyString = require('streamify-string');
 var url = require('url');
+
+function streamToString (stream) {
+  const chunks = []
+  return new Promise((resolve, reject) => {
+    stream.on('data', chunk => chunks.push(chunk))
+    stream.on('error', reject)
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+  })
+}
 
 function each(obj, cb) {
   if (obj) Object.keys(obj).forEach(function (key) {
@@ -51,7 +61,13 @@ const VALID_HTML_ATTRIBUTE_NAME = /^[^\0\t\n\f\r /<=>]+$/;
 // https://github.com/fb55/htmlparser2/issues/105
 
 function sanitizeHtml(html, options, _recursing) {
-  var result = '';
+  const s = streamifyString(html);
+  const result = sanitizeHtmlStream(s, options, _recursing);
+  return streamToString(result);
+}
+
+function sanitizeHtmlStream(stream, options, _recursing) {
+  var result = new stream.Writable()
 
   function Frame(tag, attribs) {
     var that = this;
@@ -188,7 +204,7 @@ function sanitizeHtml(html, options, _recursing) {
         // We want the contents but not this tag
         return;
       }
-      result += '<' + name;
+      result.write('<' + name);
       if (!allowedAttributesMap || has(allowedAttributesMap, name) || allowedAttributesMap['*']) {
         each(attribs, function(value, a) {
           if (!VALID_HTML_ATTRIBUTE_NAME.test(a)) {
@@ -313,9 +329,9 @@ function sanitizeHtml(html, options, _recursing) {
                 return;
               }
             }
-            result += ' ' + a;
+            result.write(' ' + a);
             if (value.length) {
-              result += '="' + escapeHtml(value, true) + '"';
+              result.write('="' + escapeHtml(value, true) + '"');
             }
           } else {
             delete frame.attribs[a];
@@ -323,11 +339,11 @@ function sanitizeHtml(html, options, _recursing) {
         });
       }
       if (options.selfClosing.indexOf(name) !== -1) {
-        result += " />";
+        result.write(" />");
       } else {
-        result += ">";
+        result.write(">");
         if (frame.innerText && !hasText && !options.textFilter) {
-          result += frame.innerText;
+          result.write(frame.innerText);
         }
       }
     },
@@ -349,13 +365,13 @@ function sanitizeHtml(html, options, _recursing) {
         // script tags is, by definition, game over for XSS protection, so if that's
         // your concern, don't allow them. The same is essentially true for style tags
         // which have their own collection of XSS vectors.
-        result += text;
+        result.write(text);
       } else {
         var escaped = escapeHtml(text, false);
         if (options.textFilter) {
-          result += options.textFilter(escaped);
+          result.write(options.textFilter(escaped));
         } else {
-          result += escaped;
+          result.write(escaped);
         }
       }
       if (stack.length) {
@@ -392,10 +408,10 @@ function sanitizeHtml(html, options, _recursing) {
         delete transformMap[depth];
       }
 
-      if (options.exclusiveFilter && options.exclusiveFilter(frame)) {
-         result = result.substr(0, frame.tagPosition);
-         return;
-      }
+      // if (options.exclusiveFilter && options.exclusiveFilter(frame)) {
+      //    result = result.substr(0, frame.tagPosition);
+      //    return;
+      // }
 
       frame.updateParentNodeText();
 
@@ -404,12 +420,12 @@ function sanitizeHtml(html, options, _recursing) {
          return;
       }
 
-      result += "</" + name + ">";
+      result.write("</" + name + ">");
     }
   }, options.parser);
-  parser.write(html);
-  parser.end();
 
+  instream.pipe(parser);
+  
   return result;
 
   function escapeHtml(s, quote) {

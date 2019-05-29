@@ -1,14 +1,19 @@
 # sanitize-html
 
-[![CircleCI](https://circleci.com/gh/punkave/sanitize-html/tree/master.svg?style=svg)](https://circleci.com/gh/punkave/sanitize-html/tree/master)
+<a href="https://apostrophecms.org/"><img src="https://raw.github.com/punkave/sanitize-html-stream/master/logos/logo-box-madefor.png" align="right" /></a>
 
-<a href="https://apostrophecms.org/"><img src="https://raw.github.com/punkave/sanitize-html/master/logos/logo-box-madefor.png" align="right" /></a>
 
-`sanitize-html` provides a simple HTML sanitizer with a clear API.
+| NOTE: This is a fork of the excellent `sanitize-html-stream` NPM to support streaming.  I've decided to fork rather than submit a pull request because the API
+| is not fully compatible.  I'd love to do a better job of this but ... deadlines.  The README below is the original readme for 
+| `sanitize-html-stream`.  Credit goes to the original authors.  Blame is mine.
 
-`sanitize-html` is tolerant. It is well suited for cleaning up HTML fragments such as those created by ckeditor and other rich text editors. It is especially handy for removing unwanted CSS when copying and pasting from Word.
+`sanitize-html-stream` provides a simple HTML sanitizer with a clear API and the ability to process both streams and strings.  To use the streaming
+approach, you can substitute a nodeJS Reader.  In that case, the library will return a Passthrough stream.  This is intended to be suitable for uploading
+possibly large HTML documents to cloud storage without reading them into memory.
 
-`sanitize-html` allows you to specify the tags you want to permit, and the permitted attributes for each of those tags.
+`sanitize-html-stream` is tolerant. It is well suited for cleaning up HTML fragments such as those created by ckeditor and other rich text editors. It is especially handy for removing unwanted CSS when copying and pasting from Word.
+
+`sanitize-html-stream` allows you to specify the tags you want to permit, and the permitted attributes for each of those tags.
 
 If a tag is not permitted, the contents of the tag are still kept, except for `script`, `style` and `textarea` tags.
 
@@ -22,7 +27,7 @@ HTML comments are not preserved.
 
 ## Requirements
 
-`sanitize-html` is intended for use with Node. That's pretty much it. All of its npm dependencies are pure JavaScript. `sanitize-html` is built on the excellent `htmlparser2` module.
+`sanitize-html-stream` is intended for use with Node. That's pretty much it. All of its npm dependencies are pure JavaScript. `sanitize-html-stream` is built on the excellent `htmlparser2` module.
 
 ## How to use
 
@@ -40,14 +45,14 @@ npm install
 npm run minify
 ```
 
-You'll find the minified and unminified versions of sanitize-html (with all its dependencies included) in the dist/ directory.
+You'll find the minified and unminified versions of sanitize-html-stream (with all its dependencies included) in the dist/ directory.
 
 Use it in the browser:
 
 ```html
 <html>
     <body>
-        <script type="text/javascript"  src="dist/sanitize-html.js"></script>
+        <script type="text/javascript"  src="dist/sanitize-html-stream.js"></script>
         <script type="text/javascript" src="demo.js"></script>
     </body>
 </html>
@@ -72,7 +77,7 @@ npm install sanitize-html
 Use it in your node app:
 
 ```js
-var sanitizeHtml = require('sanitize-html');
+var sanitizeHtml = require('sanitize-html-stream');
 
 var dirty = 'some really tacky HTML';
 var clean = sanitizeHtml(dirty);
@@ -320,7 +325,7 @@ Note that the text passed to the `textFilter` method is already escaped for safe
 
 ### Iframe Filters
 
-If you would like to allow iframe tags but want to control the domains that are allowed through you can provide an array of hostnames that you would like to allow as iframe sources. This hostname is a property in the options object passed as an argument to the `sanitize-html` function.
+If you would like to allow iframe tags but want to control the domains that are allowed through you can provide an array of hostnames that you would like to allow as iframe sources. This hostname is a property in the options object passed as an argument to the `sanitize-html-stream` function.
 
 This array will be checked against the html that is passed to the function and return only `src` urls that include the allowed hostnames in the object. The url in the html that is passed must be formatted correctly (valid hostname) as an embedded iframe otherwise the module will strip out the src from the iframe.
 
@@ -490,14 +495,14 @@ The content still gets escaped properly, with the exception of the `script` and 
 
 ## About P'unk Avenue and Apostrophe
 
-`sanitize-html` was created at [P'unk Avenue](http://punkave.com) for use in ApostropheCMS, an open-source content management system built on node.js. If you like `sanitize-html` you should definitely [check out apostrophecms.org](http://apostrophecms.org).
+`sanitize-html-stream` was created at [P'unk Avenue](http://punkave.com) for use in ApostropheCMS, an open-source content management system built on node.js. If you like `sanitize-html-stream` you should definitely [check out apostrophecms.org](http://apostrophecms.org).
 
 ## Changelog
 
-[The changelog is now in a separate file for readability.](https://github.com/punkave/sanitize-html/blob/master/CHANGELOG.md)
+[The changelog is now in a separate file for readability.](https://github.com/punkave/sanitize-html-stream/blob/master/CHANGELOG.md)
 
 ## Support
 
-Feel free to open issues on [github](http://github.com/punkave/sanitize-html).
+Feel free to open issues on [github](http://github.com/punkave/sanitize-html-stream).
 
-<a href="http://punkave.com/"><img src="https://raw.github.com/punkave/sanitize-html/master/logos/logo-box-builtby.png" /></a>
+<a href="http://punkave.com/"><img src="https://raw.github.com/punkave/sanitize-html-stream/master/logos/logo-box-builtby.png" /></a>
