@@ -3,13 +3,12 @@
 <a href="https://apostrophecms.org/"><img src="https://raw.github.com/punkave/sanitize-html-stream/master/logos/logo-box-madefor.png" align="right" /></a>
 
 
-| NOTE: This is a fork of the excellent `sanitize-html-stream` NPM to support streaming.  I've decided to fork rather than submit a pull request because the API
-| is not fully compatible.  I'd love to do a better job of this but ... deadlines.  The README below is the original readme for 
-| `sanitize-html-stream`.  Credit goes to the original authors.  Blame is mine.
+> NOTE: This is a fork of the excellent `sanitize-html` NPM to support streaming.  It is barely modified from `sanitize-html`.  For more details and the 
+> original authors, see the bottom of this file.
 
 `sanitize-html-stream` provides a simple HTML sanitizer with a clear API and the ability to process both streams and strings.  To use the streaming
 approach, you can substitute a nodeJS Reader.  In that case, the library will return a Passthrough stream.  This is intended to be suitable for uploading
-possibly large HTML documents to cloud storage without reading them into memory.
+possibly large HTML documents to cloud storage without reading them into memory.  Unfortunately, I was unable to make the "exclusiveFilter" option work with streams (since it requires backtracking to the previous location in the result).  Therefore, it has been disabled.
 
 `sanitize-html-stream` is tolerant. It is well suited for cleaning up HTML fragments such as those created by ckeditor and other rich text editors. It is especially handy for removing unwanted CSS when copying and pasting from Word.
 
@@ -276,137 +275,7 @@ To a link with anchor text:
 
 ### Filters
 
-You can provide a filter function to remove unwanted tags. Let's suppose we need to remove empty `a` tags like:
-
-```html
-<a href="page.html"></a>
-```
-
-We can do that with the following filter:
-
-```javascript
-sanitizeHtml(
-  '<p>This is <a href="http://www.linux.org"></a><br/>Linux</p>',
-  {
-    exclusiveFilter: function(frame) {
-        return frame.tag === 'a' && !frame.text.trim();
-    }
-  }
-);
-```
-
-The `frame` object supplied to the callback provides the following attributes:
-
- - `tag`: The tag name, i.e. `'img'`.
- - `attribs`: The tag's attributes, i.e. `{ src: "/path/to/tux.png" }`.
- - `text`: The text content of the tag.
- - `tagPosition`: The index of the tag's position in the result string.
-
-You can also process all text content with a provided filter function. Let's say we want an ellipsis instead of three dots.
-
-```html
-<p>some text...</p>
-```
-
-We can do that with the following filter:
-
-```javascript
-sanitizeHtml(
-  '<p>some text...</p>',
-  {
-    textFilter: function(text) {
-      return text.replace(/\.\.\./, '&hellip;');
-    }
-  }
-);
-```
-
-Note that the text passed to the `textFilter` method is already escaped for safe display as HTML. You may add markup and use entity escape sequences in your `textFilter`.
-
-### Iframe Filters
-
-If you would like to allow iframe tags but want to control the domains that are allowed through you can provide an array of hostnames that you would like to allow as iframe sources. This hostname is a property in the options object passed as an argument to the `sanitize-html-stream` function.
-
-This array will be checked against the html that is passed to the function and return only `src` urls that include the allowed hostnames in the object. The url in the html that is passed must be formatted correctly (valid hostname) as an embedded iframe otherwise the module will strip out the src from the iframe.
-
-Make sure to pass a valid hostname along with the domain you wish to allow, i.e.:
-
-```javascript
-  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
-```
-
-You may also specify whether or not to allow relative URLs as iframe sources.
-
-```javascript
-  allowIframeRelativeUrls: true
-```
-
-Note that if unspecified, relative URLs will be allowed by default if no hostname filter is provided but removed by default if a hostname filter is provided.
-
-**Remember that the `iframe` tag must be allowed as well as the `src` attribute.**
-
-For example:
-
-```javascript
-clean = sanitizeHtml('<p><iframe src="https://www.youtube.com/embed/nykIhs12345"></iframe><p>', {
-  allowedTags: [ 'p', 'em', 'strong', 'iframe' ],
-  allowedClasses: {
-    'p': [ 'fancy', 'simple' ],
-  },
-  allowedAttributes: {
-    'iframe': ['src']
-  },
-  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
-});
-```
-
-will pass through as safe whereas:
-
-```javascript
-clean = sanitizeHtml('<p><iframe src="https://www.youtube.net/embed/nykIhs12345"></iframe><p>', {
-  allowedTags: [ 'p', 'em', 'strong', 'iframe' ],
-  allowedClasses: {
-    'p': [ 'fancy', 'simple' ],
-  },
-  allowedAttributes: {
-    'iframe': ['src']
-  },
-  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
-});
-```
-
-or
-
-```javascript
-clean = sanitizeHtml('<p><iframe src="https://www.vimeo/video/12345"></iframe><p>', {
-  allowedTags: [ 'p', 'em', 'strong', 'iframe' ],
-  allowedClasses: {
-    'p': [ 'fancy', 'simple' ],
-  },
-  allowedAttributes: {
-    'iframe': ['src']
-  },
-  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
-});
-```
-
-will return an empty iframe tag.
-
-### Allowed CSS Classes
-
-If you wish to allow specific CSS classes on a particular element, you can do so with the `allowedClasses` option. Any other CSS classes are discarded.
-
-This implies that the `class` attribute is allowed on that element.
-
-```javascript
-// Allow only a restricted set of CSS classes and only on the p tag
-clean = sanitizeHtml(dirty, {
-  allowedTags: [ 'p', 'em', 'strong' ],
-  allowedClasses: {
-    'p': [ 'fancy', 'simple' ]
-  }
-});
-```
+Filters have been removed from the streaming version of this library as I haven't yet figured out a way to implement them.
 
 ### Allowed CSS Styles
 
@@ -495,14 +364,6 @@ The content still gets escaped properly, with the exception of the `script` and 
 
 ## About P'unk Avenue and Apostrophe
 
-`sanitize-html-stream` was created at [P'unk Avenue](http://punkave.com) for use in ApostropheCMS, an open-source content management system built on node.js. If you like `sanitize-html-stream` you should definitely [check out apostrophecms.org](http://apostrophecms.org).
+`sanitize-html-stream` is a streaming fork done in an afternoon of `sanitize-html`, which was created at [P'unk Avenue](http://punkave.com) for use in ApostropheCMS, an open-source content management system built on node.js. If you like `sanitize-html-stream` you should definitely [check out apostrophecms.org](http://apostrophecms.org).  I've posted this to npm and github because it seems there's no other **streaming** html sanitizer available.  
 
-## Changelog
 
-[The changelog is now in a separate file for readability.](https://github.com/punkave/sanitize-html-stream/blob/master/CHANGELOG.md)
-
-## Support
-
-Feel free to open issues on [github](http://github.com/punkave/sanitize-html-stream).
-
-<a href="http://punkave.com/"><img src="https://raw.github.com/punkave/sanitize-html-stream/master/logos/logo-box-builtby.png" /></a>
